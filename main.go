@@ -1,5 +1,8 @@
 package main
 
+//TODO: Break up some components of the TUI into their own go files/directories
+//TODO: Add legend for keybinds
+
 import (
 	"fmt"
 	"os"
@@ -32,7 +35,7 @@ func (m model) Init() tea.Cmd { return nil }
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 	switch msg := msg.(type) {
-	//TODO: Fix dynamic windo size
+
 	case tea.WindowSizeMsg:
 		m.width = msg.Width
 		m.height = msg.Height
@@ -72,32 +75,25 @@ func createColumns(width int) []table.Column {
 	totalWidth := width - 10
 
 	// Allocate width proportionally
-	senderW := 25
-	dateW := 10
-	timeW := 10
-	messageW := totalWidth - senderW - dateW - timeW
+	senderWidth := 25
+	dateWidth := 10
+	timeWidth := 10
+	messageWidth := totalWidth - senderWidth - dateWidth - timeWidth
 
 	// Don't let message width go negative
-	if messageW < 20 {
-		messageW = 20
+	if messageWidth < 20 {
+		messageWidth = 20
 	}
 
 	return []table.Column{
-		{Title: "Sender", Width: senderW},
-		{Title: "Date", Width: dateW},
-		{Title: "Time", Width: timeW},
-		{Title: "Message", Width: messageW},
+		{Title: "Sender", Width: senderWidth},
+		{Title: "Date", Width: dateWidth},
+		{Title: "Time", Width: timeWidth},
+		{Title: "Message", Width: messageWidth},
 	}
 }
 
 func main() {
-
-	/*columns := []table.Column{
-		{Title: "Sender", Width: 25},   // ex: johnsmith@email.com
-		{Title: "Date", Width: 10},     // ex: 10/20/2025
-		{Title: "Time", Width: 10},     // ex: 10:00AM
-		{Title: "Message", Width: 125}, // Contents of email -- Show preview ??
-	}*/
 
 	columns := createColumns(placholderWidth)
 
@@ -114,6 +110,11 @@ func main() {
 		table.WithHeight(10),
 	)
 
+	m := model{
+		table: t,
+		width: placholderWidth,
+	}
+
 	s := table.DefaultStyles()
 	s.Header = s.Header.
 		BorderStyle(lipgloss.NormalBorder()).
@@ -128,12 +129,6 @@ func main() {
 
 	t.SetStyles(s)
 
-	m := model{
-		table: t,
-		width: placholderWidth,
-	}
-
-	//TODO: add back in tea.NewProgram(m,  tea.WithAltScreen())
 	if _, err := tea.NewProgram(m, tea.WithAltScreen()).Run(); err != nil {
 		fmt.Println("Error running program: ", err)
 		os.Exit(1)

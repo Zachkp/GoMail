@@ -33,3 +33,5 @@ go.work.sum
 
 # ignore to-do list
 /TODO.md
+/projectStructure.txt
+/models/TODO.md

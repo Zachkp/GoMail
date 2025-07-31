@@ -93,8 +93,7 @@ func createColumns(width int) []table.Column {
 	}
 }
 
-func main() {
-
+func createTable() model {
 	columns := createColumns(placholderWidth)
 
 	//TODO: Populate from email account, then use Bat to display whole email
@@ -129,7 +128,12 @@ func main() {
 
 	t.SetStyles(s)
 
-	if _, err := tea.NewProgram(m, tea.WithAltScreen()).Run(); err != nil {
+	return m
+}
+
+func main() {
+
+	if _, err := tea.NewProgram(createTable(), tea.WithAltScreen()).Run(); err != nil {
 		fmt.Println("Error running program: ", err)
 		os.Exit(1)
 	}

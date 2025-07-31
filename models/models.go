@@ -23,6 +23,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.width = msg.Width
 		m.height = msg.Height
 		m.table.SetColumns(CreateColumns(m.width))
+		m.table.SetHeight(m.height)
 		return m, nil
 
 	//TODO: Add Logic for some of these

@@ -16,5 +16,4 @@ func main() {
 		fmt.Println("Error running program: ", err)
 		os.Exit(1)
 	}
-
 }

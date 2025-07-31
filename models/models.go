@@ -25,19 +25,19 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.table.SetColumns(CreateColumns(m.width))
 		return m, nil
 
+	//TODO: Add Logic for some of these
 	case tea.KeyMsg:
 		switch {
 		case key.Matches(msg, CommonKeys.Quit):
 			return m, tea.Quit
 		case key.Matches(msg, CommonKeys.Up):
 
+		case key.Matches(msg, CommonKeys.Down):
+
+		case key.Matches(msg, CommonKeys.Search):
+
 		case key.Matches(msg, CommonKeys.Select):
-			return m, tea.Batch(
-				tea.Printf("Email from: %s", m.table.SelectedRow()[0]),
-				tea.Printf("Received on: %s", m.table.SelectedRow()[1]),
-				tea.Printf("Width: %d", m.width),
-				tea.Printf("Height: %d", m.height),
-			)
+
 		}
 	}
 

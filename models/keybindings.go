@@ -1,6 +1,15 @@
 package models
 
-import "github.com/charmbracelet/bubbles/key"
+import (
+	"github.com/charmbracelet/bubbles/help"
+	"github.com/charmbracelet/bubbles/key"
+)
+
+// Shared keymap and help instance
+var (
+	CommonKeys = NewKeyMap()
+	CommonHelp = help.New()
+)
 
 type KeyMap struct {
 	Up     key.Binding
@@ -23,10 +32,10 @@ func (k KeyMap) FullHelp() [][]key.Binding {
 
 func NewKeyMap() KeyMap {
 	return KeyMap{
-		Up:     key.NewBinding(key.WithKeys("k", "up"), key.WithHelp("↑ - k", "up")),
-		Down:   key.NewBinding(key.WithKeys("j", "down"), key.WithHelp("↓ - j", "down")),
+		Up:     key.NewBinding(key.WithKeys("k", "up"), key.WithHelp("↑/k", "up")),
+		Down:   key.NewBinding(key.WithKeys("j", "down"), key.WithHelp("↓/j", "down")),
 		Select: key.NewBinding(key.WithKeys("enter"), key.WithHelp("enter", "select")),
-		Search: key.NewBinding(key.WithKeys("/", "f"), key.WithHelp("/ - f", "search")),
+		Search: key.NewBinding(key.WithKeys("/"), key.WithHelp("/", "search")),
 		Quit:   key.NewBinding(key.WithKeys("q", "ctrl+c"), key.WithHelp("q", "quit")),
 	}
 }

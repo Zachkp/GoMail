@@ -1,9 +1,10 @@
 package models
 
 import (
-	"github.com/Zachkp/GoMail/styles"
+	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 )
 
 type model struct {
@@ -25,16 +26,12 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nil
 
 	case tea.KeyMsg:
-		switch msg.String() {
-		case "esc":
-			if m.table.Focused() {
-				m.table.Blur()
-			} else {
-				m.table.Focus()
-			}
-		case "q", "ctrl+c":
+		switch {
+		case key.Matches(msg, CommonKeys.Quit):
 			return m, tea.Quit
-		case "enter":
+		case key.Matches(msg, CommonKeys.Up):
+
+		case key.Matches(msg, CommonKeys.Select):
 			return m, tea.Batch(
 				tea.Printf("Email from: %s", m.table.SelectedRow()[0]),
 				tea.Printf("Received on: %s", m.table.SelectedRow()[1]),
@@ -49,5 +46,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m model) View() string {
-	return styles.BaseStyle.Render(m.table.View()) + "\n"
+	tableView := m.table.View()
+	helpView := CommonHelp.View(CommonKeys)
+
+	return lipgloss.JoinVertical(lipgloss.Center, tableView, helpView)
 }

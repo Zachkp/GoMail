@@ -6,10 +6,10 @@ require (
 	github.com/charmbracelet/bubbles v0.21.0
 	github.com/charmbracelet/bubbletea v1.3.6
 	github.com/charmbracelet/lipgloss v1.1.0
-	
-	// Not used yet but need for future 
-	//github.com/lithammer/fuzzysearch v1.1.8
-	//github.com/spf13/viper v1.20.1
+
+// Not used yet but need for future
+//github.com/lithammer/fuzzysearch v1.1.8
+//github.com/spf13/viper v1.20.1
 )
 
 require (

@@ -7,19 +7,11 @@ import (
 )
 
 func CreateColumns(width int) []table.Column {
-	// Reserve a little padding (e.g., for borders or spacing)
-	totalWidth := width - 10
-
 	// Allocate width proportionally
-	senderWidth := 25
+	senderWidth := 30
 	dateWidth := 10
 	timeWidth := 10
-	messageWidth := totalWidth - senderWidth - dateWidth - timeWidth
-
-	// Don't let message width go negative
-	if messageWidth < 20 {
-		messageWidth = 20
-	}
+	messageWidth := width - senderWidth - dateWidth - timeWidth
 
 	return []table.Column{
 		{Title: "Sender", Width: senderWidth},

@@ -1,7 +1,6 @@
 package models
 
 import (
-	"sync"
 	"time"
 )
 
@@ -36,8 +35,10 @@ type Email struct {
 	Read      bool
 }
 
+/*
 type FileStore struct {
 	path   string
 	emails []Email
 	mu     sync.Mutex
 }
+*/

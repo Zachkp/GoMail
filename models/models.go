@@ -1,6 +1,7 @@
 package models
 
 import (
+	"github.com/Zachkp/GoMail/styles"
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
@@ -22,8 +23,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		m.width = msg.Width
 		m.height = msg.Height
-		m.table.SetColumns(CreateColumns(m.width))
-		m.table.SetHeight(m.height)
+		m.table.SetColumns(CreateColumns(m.width - 20))
+		m.table.SetHeight(m.height - 20)
+
 		return m, nil
 
 	//TODO: Add Logic for some of these
@@ -47,8 +49,18 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m model) View() string {
-	tableView := m.table.View()
+	tableView := lipgloss.NewStyle().
+		Border(lipgloss.NormalBorder()).
+		BorderForeground(lipgloss.Color(styles.Green)).
+		Padding(0, 1)
+
 	helpView := CommonHelp.View(CommonKeys)
 
-	return lipgloss.JoinVertical(lipgloss.Center, tableView, helpView)
+	bordered := tableView.Render(m.table.View())
+
+	padded := lipgloss.NewStyle().
+		Padding(2, 4).
+		Render(bordered)
+
+	return lipgloss.JoinVertical(lipgloss.Center, padded, helpView)
 }

@@ -72,7 +72,7 @@ func CreateTable() model {
 		table.WithColumns(columns),
 		table.WithRows(rows),
 		table.WithFocused(true),
-		table.WithHeight(20),
+		table.WithHeight(1),
 	)
 
 	m := model{
@@ -82,7 +82,7 @@ func CreateTable() model {
 
 	s := table.DefaultStyles()
 	s.Header = s.Header.
-		BorderStyle(lipgloss.NormalBorder()).
+		BorderStyle(lipgloss.ThickBorder()).
 		BorderForeground(lipgloss.Color(styles.Green)).
 		BorderBottom(true).
 		Bold(true)

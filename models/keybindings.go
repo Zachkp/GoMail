@@ -12,21 +12,32 @@ var (
 )
 
 type KeyMap struct {
-	Up     key.Binding
-	Down   key.Binding
-	Back   key.Binding
-	Select key.Binding
-	Search key.Binding
-	Quit   key.Binding
+	Up       key.Binding
+	Down     key.Binding
+	PageUp   key.Binding
+	PageDown key.Binding
+	Back     key.Binding
+	Select   key.Binding
+	Search   key.Binding
+	Quit     key.Binding
 }
 
 func (k KeyMap) ShortHelp() []key.Binding {
-	return []key.Binding{k.Up, k.Down, k.Select, k.Search, k.Quit, k.Back}
+	return []key.Binding{
+		k.Up,
+		k.Down,
+		k.PageUp,
+		k.PageDown,
+		k.Select,
+		k.Search,
+		k.Quit,
+		k.Back,
+	}
 }
 
 func (k KeyMap) FullHelp() [][]key.Binding {
 	return [][]key.Binding{
-		{k.Up, k.Down, k.Select},
+		{k.Up, k.Down, k.PageUp, k.PageDown, k.Select},
 		{k.Search, k.Quit, k.Back},
 	}
 }

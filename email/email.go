@@ -4,25 +4,77 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"regexp"
 	"strings"
 
 	"github.com/emersion/go-imap"
 	"github.com/emersion/go-imap/client"
 	"github.com/emersion/go-message/mail"
 	"github.com/joho/godotenv"
+	"golang.org/x/net/html"
 )
 
-// Email represents a simplified email record with body text
+// Email represents a simplified email record with body text (plain or HTML as-is)
 type Email struct {
 	From    string
 	Subject string
 	Date    string
-	Body    string // plain text body
+	Body    string
 }
 
-// FetchLatestEmails connects to the IMAP server and returns the newest N emails (newest-first) with plain text bodies
+func htmlToPlainText(htmlStr string) string {
+	doc, err := html.Parse(strings.NewReader(htmlStr))
+	if err != nil {
+		return htmlStr
+	}
+
+	var buf strings.Builder
+
+	var f func(*html.Node)
+	f = func(n *html.Node) {
+		if n.Type == html.ElementNode && (n.Data == "style" || n.Data == "script" || n.Data == "head" || n.Data == "meta" || n.Data == "link") {
+			return
+		}
+
+		if n.Type == html.TextNode {
+			// Clean up whitespace (collapse multiple spaces)
+			text := strings.TrimSpace(n.Data)
+			if len(text) > 0 {
+				buf.WriteString(text)
+				buf.WriteString(" ")
+			}
+		}
+
+		if n.Type == html.ElementNode {
+			switch n.Data {
+			case "p", "div", "br", "tr":
+				buf.WriteString("\n")
+			case "li":
+				buf.WriteString("\n- ")
+			case "a":
+				for c := n.FirstChild; c != nil; c = c.NextSibling {
+					f(c)
+				}
+				return
+			}
+		}
+
+		for c := n.FirstChild; c != nil; c = c.NextSibling {
+			f(c)
+		}
+	}
+	f(doc)
+
+	return strings.TrimSpace(buf.String())
+}
+
+func collapseBlankLines(text string) string {
+	re := regexp.MustCompile(`\n{3,}`)
+	text = re.ReplaceAllString(text, "\n")
+	return text
+}
+
 func FetchLatestEmails(limit uint32) ([]Email, error) {
-	// Load .env
 	if err := godotenv.Load(); err != nil {
 		return nil, fmt.Errorf("error loading .env file: %w", err)
 	}
@@ -36,14 +88,13 @@ func FetchLatestEmails(limit uint32) ([]Email, error) {
 		return nil, fmt.Errorf("missing required environment variables")
 	}
 
-	// Connect to server
+	// Connect and login
 	c, err := client.DialTLS(fmt.Sprintf("%s:%s", host, port), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect: %w", err)
 	}
 	defer c.Logout()
 
-	// Login
 	if err := c.Login(username, password); err != nil {
 		return nil, fmt.Errorf("login failed: %w", err)
 	}
@@ -53,12 +104,10 @@ func FetchLatestEmails(limit uint32) ([]Email, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to select INBOX: %w", err)
 	}
-
 	if mbox.Messages == 0 {
 		return []Email{}, nil
 	}
 
-	// Determine range for newest N messages
 	var from uint32
 	if mbox.Messages > limit {
 		from = mbox.Messages - limit + 1
@@ -70,7 +119,6 @@ func FetchLatestEmails(limit uint32) ([]Email, error) {
 	seqSet := new(imap.SeqSet)
 	seqSet.AddRange(from, to)
 
-	// Fetch both envelope and body
 	section := &imap.BodySectionName{}
 	items := []imap.FetchItem{imap.FetchEnvelope, section.FetchItem()}
 
@@ -88,12 +136,13 @@ func FetchLatestEmails(limit uint32) ([]Email, error) {
 			fromAddr = msg.Envelope.From[0].Address()
 		}
 
-		// Extract the body
 		body := ""
+
 		if r := msg.GetBody(section); r != nil {
 			mr, err := mail.CreateReader(r)
 			if err == nil {
-				// Loop through all parts
+				var htmlBody, plainBody string
+
 				for {
 					p, err := mr.NextPart()
 					if err == io.EOF {
@@ -106,11 +155,21 @@ func FetchLatestEmails(limit uint32) ([]Email, error) {
 					switch h := p.Header.(type) {
 					case *mail.InlineHeader:
 						ct := h.Get("Content-Type")
-						if strings.HasPrefix(ct, "text/plain") {
-							b, _ := io.ReadAll(p.Body)
-							body = string(b)
+						b, _ := io.ReadAll(p.Body)
+						content := string(b)
+						if strings.HasPrefix(ct, "text/html") && htmlBody == "" {
+							htmlBody = content
+						} else if strings.HasPrefix(ct, "text/plain") && plainBody == "" {
+							plainBody = content
 						}
 					}
+				}
+
+				if htmlBody != "" {
+					plainText := htmlToPlainText(htmlBody)
+					cleanText := collapseBlankLines(plainText)
+					body = cleanText
+
 				}
 			}
 		}
@@ -127,7 +186,6 @@ func FetchLatestEmails(limit uint32) ([]Email, error) {
 		return nil, fmt.Errorf("failed to fetch messages: %w", err)
 	}
 
-	// Reverse slice for newest-first
 	for i, j := 0, len(emails)-1; i < j; i, j = i+1, j-1 {
 		emails[i], emails[j] = emails[j], emails[i]
 	}

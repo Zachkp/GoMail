@@ -9,19 +9,17 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-// CreateColumns sets up the column layout for the table
 func CreateColumns(width int) []table.Column {
-	// Allocate width proportionally
 	senderWidth := 30
 	dateWidth := 10
 	timeWidth := 10
-	messageWidth := width - senderWidth - dateWidth - timeWidth
+	subjectWidth := width - senderWidth - dateWidth - timeWidth
 
 	return []table.Column{
 		{Title: "Sender", Width: senderWidth},
 		{Title: "Date", Width: dateWidth},
 		{Title: "Time", Width: timeWidth},
-		{Title: "Message", Width: messageWidth},
+		{Title: "Subject", Width: subjectWidth},
 	}
 }
 
@@ -63,10 +61,9 @@ func CreateTable() model {
 	m := model{
 		table:  t,
 		width:  styles.PlaceholderWidth,
-		emails: emails, // keep the full email data here
+		emails: emails,
 	}
 
-	// styling...
 	s := table.DefaultStyles()
 	s.Header = s.Header.
 		BorderStyle(lipgloss.ThickBorder()).

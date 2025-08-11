@@ -9,12 +9,14 @@ require (
 	github.com/emersion/go-imap v1.2.1
 	github.com/emersion/go-message v0.18.2
 	github.com/joho/godotenv v1.5.1
-	golang.org/x/net v0.42.0
 
-// Not used yet but need for future
-//github.com/lithammer/fuzzysearch v1.1.8
+	// Not used yet but need for future
+	github.com/lithammer/fuzzysearch v1.1.8
+	golang.org/x/net v0.42.0
 //github.com/spf13/viper v1.20.1
 )
+
+require github.com/atotto/clipboard v0.1.4 // indirect
 
 require (
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect

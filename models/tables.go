@@ -1,3 +1,4 @@
+// Updated models/tables.go
 package models
 
 import (
@@ -58,10 +59,14 @@ func CreateTable() model {
 		table.WithHeight(10),
 	)
 
+	// Initialize search state
+	searchState := InitSearch()
+
 	m := model{
 		table:  t,
 		width:  styles.PlaceholderWidth,
 		emails: emails,
+		search: searchState,
 	}
 
 	s := table.DefaultStyles()

@@ -35,3 +35,4 @@ go.work.sum
 /TODO.md
 /projectStructure.txt
 /models/TODO.md
+build/

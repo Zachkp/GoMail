@@ -3,14 +3,13 @@ package email
 import (
 	"fmt"
 	"io"
-	"os"
 	"regexp"
 	"strings"
 
+	"github.com/Zachkp/GoMail/config"
 	"github.com/emersion/go-imap"
 	"github.com/emersion/go-imap/client"
 	"github.com/emersion/go-message/mail"
-	"github.com/joho/godotenv"
 	"golang.org/x/net/html"
 )
 
@@ -75,28 +74,21 @@ func collapseBlankLines(text string) string {
 }
 
 func FetchLatestEmails(limit uint32) ([]Email, error) {
-	if err := godotenv.Load(); err != nil {
-		return nil, fmt.Errorf("error loading .env file: %w", err)
-	}
-
-	username := os.Getenv("EMAIL_USERNAME")
-	password := os.Getenv("EMAIL_PASSWORD")
-	host := os.Getenv("EMAIL_IMAP_HOST")
-	port := os.Getenv("EMAIL_IMAP_PORT")
-
-	if username == "" || password == "" || host == "" || port == "" {
-		return nil, fmt.Errorf("missing required environment variables")
+	// Load configuration
+	cfg, err := config.LoadConfig()
+	if err != nil {
+		return nil, fmt.Errorf("failed to load configuration: %w", err)
 	}
 
 	// Connect and login
-	c, err := client.DialTLS(fmt.Sprintf("%s:%s", host, port), nil)
+	c, err := client.DialTLS(fmt.Sprintf("%s:%s", cfg.EmailImapHost, cfg.EmailImapPort), nil)
 	if err != nil {
-		return nil, fmt.Errorf("failed to connect: %w", err)
+		return nil, fmt.Errorf("failed to connect to %s:%s: %w", cfg.EmailImapHost, cfg.EmailImapPort, err)
 	}
 	defer c.Logout()
 
-	if err := c.Login(username, password); err != nil {
-		return nil, fmt.Errorf("login failed: %w", err)
+	if err := c.Login(cfg.EmailUsername, cfg.EmailPassword); err != nil {
+		return nil, fmt.Errorf("login failed for %s: %w", cfg.EmailUsername, err)
 	}
 
 	// Select INBOX
@@ -169,7 +161,8 @@ func FetchLatestEmails(limit uint32) ([]Email, error) {
 					plainText := htmlToPlainText(htmlBody)
 					cleanText := collapseBlankLines(plainText)
 					body = cleanText
-
+				} else if plainBody != "" {
+					body = plainBody
 				}
 			}
 		}
@@ -186,6 +179,7 @@ func FetchLatestEmails(limit uint32) ([]Email, error) {
 		return nil, fmt.Errorf("failed to fetch messages: %w", err)
 	}
 
+	// Reverse the slice to show newest emails first
 	for i, j := 0, len(emails)-1; i < j; i, j = i+1, j-1 {
 		emails[i], emails[j] = emails[j], emails[i]
 	}

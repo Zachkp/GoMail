@@ -1,3 +1,5 @@
+![](GoMail.gif)
+
 # 📬 email-tui-fzf
 
 A terminal-based email viewer built with [Bubbletea](https://github.com/charmbracelet/bubbletea), featuring fuzzy search powered by `fzf`-like filtering.
